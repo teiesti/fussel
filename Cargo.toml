@@ -1,0 +1,20 @@
+[package]
+name = "fussel"
+version = "0.1.0-dev"
+authors = ["Tobias Stolzmann <tobias.stolzmann@gmail.com>"]
+license = "MIT"
+keywords = ["lint"]
+categories = ["development-tools"]
+description = "An analysis tool that checks for common pitfalls within a codebase"
+readme = "README.md"
+documentation = "https://docs.rs/fussel"
+repository = "https://github.com/teiesti/fussel"
+
+[badges]
+travis-ci = { repository = "teiesti/fussel" }
+
+[dependencies]
+
+[[bin]]
+name = "fussel"
+doc = false
