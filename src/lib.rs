@@ -8,6 +8,8 @@
     unused_qualifications,
 )]
 
+pub mod fault;
+
 pub fn main() {
     println!("Hello, world!");
 }
