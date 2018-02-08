@@ -3,12 +3,12 @@ use std::path::PathBuf;
 
 #[derive(Clone, Copy, Debug, Default, Eq, Hash, Ord, PartialOrd, PartialEq)]
 pub struct Position {
-    pub row: u32,
-    pub col: u32,
+    pub row: usize,
+    pub col: usize,
 }
 
 impl Position {
-    pub fn new(row: u32, col: u32) -> Self {
+    pub fn new(row: usize, col: usize) -> Self {
         Self { row, col }
     }
 }
@@ -196,6 +196,11 @@ pub struct Example {
 
 impl Example {
     // TODO add one or more ctors
+
+    pub(self) fn canvas_prefix(&self) -> String {
+        let len = format!("{}", self.ctx.range.lb.row).len(); // TODO enhance efficiency
+        " ".repeat(len)
+    }
 }
 
 impl fmt::Display for Example {
@@ -217,6 +222,18 @@ impl Fault {
 
 impl fmt::Display for Fault {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        unimplemented!() // TODO
+        // Write the message
+        writeln!(f, "{}", self.msg)?;
+
+        // Write the example
+        writeln!(f, "{}", self.example)?;
+
+        // Write all the hints
+        let prefix = self.example.canvas_prefix();
+        for msg in &self.hints {
+            writeln!(f, "{} = {}", prefix, msg)?;
+        }
+
+        Ok(())
     }
 }
