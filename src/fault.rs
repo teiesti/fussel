@@ -87,16 +87,22 @@ impl Scope {
         Self { path, range }
     }
 
-    pub fn bounds(&self) -> (Spot, Spot) {
-        let lb = Spot {
+    pub fn lb(&self) -> Spot {
+        Spot {
             path: self.path.clone(),
             pos: self.range.lb,
-        };
-        let ub = Spot {
+        }
+    }
+
+    pub fn ub(&self) -> Spot {
+        Spot {
             path: self.path.clone(),
             pos: self.range.ub,
-        };
-        (lb, ub)
+        }
+    }
+
+    pub fn bounds(&self) -> (Spot, Spot) {
+        (self.lb(), self.ub())
     }
 
     pub fn contains(&self, other: &Self) -> bool {
@@ -205,7 +211,22 @@ impl Example {
 
 impl fmt::Display for Example {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        unimplemented!() // TODO
+        // Collect data
+        let prefix      = self.canvas_prefix();
+        let position    = self.mark.lb();
+        let txt         = &self.txt;
+        let offset      = " ".repeat(self.mark.range.lb.col - self.ctx.range.lb.col);
+        let mark        = "^".repeat(self.mark.range.ub.col - self.mark.range.lb.col);
+        let msg         = &self.msg;
+
+        // Write data
+        writeln!(f, "{}--> {}"          , prefix, position              )?;
+        writeln!(f, "{} |"              , prefix                        )?;
+        writeln!(f, "{} |     {}"       , prefix, txt                   )?;
+        writeln!(f, "{} |     {}{} {}"  , prefix, offset, mark, msg     )?;
+        writeln!(f, "{} |"              , prefix                        )?;
+
+        Ok(())
     }
 }
 
