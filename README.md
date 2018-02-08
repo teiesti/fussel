@@ -17,7 +17,7 @@
 [doc]: https://docs.rs/fussel/badge.svg
 [docs.rs]: https://docs.rs/fussel
 
-An analysis tool that checks for common pitfalls within a codebase
+An analysis tool that finds bad programming habits within a codebase
 
 ## WARNING
 
