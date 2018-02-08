@@ -10,6 +10,7 @@ warning: lines should not end with trailing whitespace, unless the file format r
   |
 9 | let n = 42;
   |            ^^^ trailing whitespace found here
+  |
   = note: filenames ending with '.md' are ignored
 ```
 
@@ -32,10 +33,11 @@ warning: files should end with a trailing newline
 
 ```
 warning: line breaks should be consistent
---> src/main.rs:9:11
+ --> src/main.rs:9:11
   |
 9 | let n = 42;
   |            ^^ CRLF found here
+  |
   = help: use LF instead
 ```
 
@@ -52,6 +54,7 @@ warning: tabs should be avoided
   |
 9 |     let n = 42;
   | ^^^^ tab found here
+  |
   = help: use spaces instead of tabs
 ```
 
@@ -60,6 +63,7 @@ warning: indentation should be a multiple of 4
  --> src/main.rs:9:0
   |
 9 |    let n = 42;
+  |
   | ^^^ indentation is not a multiple of 4
 ```
 
@@ -84,6 +88,7 @@ warning: there should be no incomplete work
   |
 9 | // TODO
   |    ^^^^ keyword suggests incomplete work
+  |
   = help: remove keyword after completing work
   = note: 'TODO', 'FIXME' and 'DEBUG' are recognized as keywords for incomplete work
 ```
