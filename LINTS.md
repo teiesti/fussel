@@ -80,7 +80,7 @@ warning: file encoding should be consistent
 
 ```plain
 warning: there should be no incomplete work
---> src/main.rs:9:3
+ --> src/main.rs:9:3
   |
 9 | // TODO
   |    ^^^^ keyword suggests incomplete work
