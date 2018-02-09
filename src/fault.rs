@@ -206,15 +206,13 @@ impl fmt::Display for Message {
 
 #[derive(Clone, Debug, Eq, Hash, PartialEq)]
 pub struct Example {
-    pub txt: String,
-    pub msg: Message,
     pub mark: Scope,
     pub ctx: Scope,
+    pub txt: String,
+    pub msg: Message,
 }
 
 impl Example {
-    // TODO add one or more ctors
-
     pub(self) fn canvas_prefix(&self) -> String {
         let len = format!("{}", self.ctx.range.lb.row).len(); // TODO enhance efficiency
         " ".repeat(len)
@@ -248,10 +246,6 @@ pub struct Fault {
     pub msg: Message,
     pub example: Example,
     pub hints: Vec<Message>,
-}
-
-impl Fault {
-    // TODO add one or more ctors
 }
 
 impl fmt::Display for Fault {
@@ -362,8 +356,6 @@ mod tests {
         let fault = Fault {
             msg: Message::warning("tabs should be avoided"),
             example: Example {
-                txt: "    let n = 42;".into(),
-                msg: Message::bare("tab found here"),
                 mark: Scope {
                     path: "src/main.rs".into(),
                     range: (
@@ -378,6 +370,8 @@ mod tests {
                         (9, 14).into(),
                     ).into(),
                 },
+                txt: "    let n = 42;".into(),
+                msg: Message::bare("tab found here"),
             },
             hints: vec![
                 Message::help("use spaces instead of tabs"),
