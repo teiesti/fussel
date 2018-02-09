@@ -8,7 +8,12 @@
     unused_qualifications,
 )]
 
+#[macro_use] extern crate failure;
+extern crate git2;
+extern crate walkdir;
+
 pub mod fault;
+pub mod walker;
 
 pub fn main() {
     println!("Hello, world!");
