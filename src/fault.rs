@@ -258,3 +258,98 @@ impl fmt::Display for Fault {
         Ok(())
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn position_ord() {
+        let p1 = Position::new(0, 0);
+        let p2 = Position::new(0, 1);
+        let p3 = Position::new(1, 0);
+        let p4 = Position::new(1, 1);
+
+        assert!(p1 < p2);
+        assert!(p2 < p3);
+        assert!(p3 < p4);
+    }
+
+    #[test]
+    fn position_fmt() {
+        let pos = Position::new(47, 11);
+        assert_eq!(format!("{}", pos), "47:11");
+    }
+
+    #[test]
+    fn range_ctor_symmetric() {
+        let p1 = Position::new(0, 1);
+        let p2 = Position::new(1, 0);
+
+        let r1 = Range::new(p1, p2);
+        let r2 = Range::new(p2, p1);
+
+        assert_eq!(r1, r2);
+    }
+
+    #[test]
+    fn range_fmt() {
+        let p1 = Position::new(0, 0);
+        let p2 = Position::new(0, 1);
+        let p3 = Position::new(1, 0);
+        let p4 = Position::new(1, 1);
+
+        let r1 = Range::new(p1, p1);
+        let r2 = Range::new(p1, p2);
+        let r3 = Range::new(p1, p3);
+        let r4 = Range::new(p1, p4);
+
+        assert_eq!(format!("{}", r1), "0:0");
+        assert_eq!(format!("{}", r2), "0:0...1");
+        assert_eq!(format!("{}", r3), "0:0...1:0");
+        assert_eq!(format!("{}", r4), "0:0...1:1");
+    }
+
+    #[test]
+    fn spot_fmt() {
+        let spot = Spot::new(
+            "src/main.rs".into(),
+            Position::new(9, 11),
+        );
+        assert_eq!(format!("{}", spot), "src/main.rs:9:11");
+    }
+
+    #[test]
+    fn scope_fmt() {
+        let scope = Scope::new(
+            "src/main.rs".into(),
+            Range::new(
+                Position::new(0, 815),
+                Position::new(47, 11),
+            ),
+        );
+        assert_eq!(format!("{}", scope), "src/main.rs:0:815...47:11");
+    }
+
+    #[test]
+    fn message_fmt() {
+        let error   = Message::error(  "lorem ipsum".into());
+        let warning = Message::warning("lorem ipsum".into());
+        let note    = Message::note(   "lorem ipsum".into());
+        let help    = Message::help(   "lorem ipsum".into());
+
+        assert_eq!(format!("{}", error  ), "error: lorem ipsum"  );
+        assert_eq!(format!("{}", warning), "warning: lorem ipsum");
+        assert_eq!(format!("{}", note   ), "note: lorem ipsum"   );
+        assert_eq!(format!("{}", help   ), "help: lorem ipsum"   );
+    }
+
+    #[test]
+    fn example_fmt() {
+        // TODO
+    }
+
+    fn fault_fmt() {
+        // TODO
+    }
+}
