@@ -220,15 +220,16 @@ impl fmt::Display for Example {
         // Collect data
         let prefix      = self.canvas_prefix();
         let position    = self.mark.lb();
+        let line        = self.mark.range.lb.row;
         let txt         = &self.txt;
         let offset      = " ".repeat(self.mark.range.lb.col - self.ctx.range.lb.col);
-        let mark        = "^".repeat(self.mark.range.ub.col - self.mark.range.lb.col);
+        let mark        = "^".repeat(self.mark.range.ub.col - self.mark.range.lb.col + 1);
         let msg         = &self.msg;
 
         // Write data
         writeln!(f, "{}--> {}"          , prefix, position              )?;
         writeln!(f, "{} |"              , prefix                        )?;
-        writeln!(f, "{} |     {}"       , prefix, txt                   )?;
+        writeln!(f, "{} |     {}"       , line, txt                     )?;
         writeln!(f, "{} |     {}{} {}"  , prefix, offset, mark, msg     )?;
         writeln!(f, "{} |"              , prefix                        )?;
 
@@ -253,7 +254,7 @@ impl fmt::Display for Fault {
         writeln!(f, "{}", self.msg)?;
 
         // Write the example
-        writeln!(f, "{}", self.example)?;
+        write!(f, "{}", self.example)?;
 
         // Write all the hints
         let prefix = self.example.canvas_prefix();
@@ -351,11 +352,43 @@ mod tests {
     }
 
     #[test]
-    fn example_fmt() {
-        // TODO
-    }
-
     fn fault_fmt() {
-        // TODO
+        let fault = Fault {
+            msg: Message::warning("tabs should be avoided".into()),
+            example: Example {
+                txt: "    let n = 42;".into(),
+                msg: Message::bare("tab found here".into()),
+                mark: Scope::new(
+                    "src/main.rs".into(),
+                    Range::new(
+                        Position::new(9, 0),
+                        Position::new(9, 3),
+                    ),
+                ),
+                ctx: Scope::new(
+                    "src/main.rs".into(),
+                    Range::new(
+                        Position::new(9, 0),
+                        Position::new(9, 14),
+                    ),
+                ),
+            },
+            hints: vec![
+                Message::help("use spaces instead of tabs".into()),
+            ],
+        };
+
+        let got = format!("{}", fault);
+        let should_be = concat!(
+            "warning: tabs should be avoided\n",
+            " --> src/main.rs:9:0\n",
+            "  |\n",
+            "9 |         let n = 42;\n",
+            "  |     ^^^^ tab found here\n",
+            "  |\n",
+            "  = help: use spaces instead of tabs\n",
+        );
+
+        assert_eq!(got, should_be);
     }
 }
