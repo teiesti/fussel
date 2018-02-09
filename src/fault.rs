@@ -7,15 +7,15 @@ pub struct Position {
     pub col: usize,
 }
 
-impl Position {
-    pub fn new(row: usize, col: usize) -> Self {
-        Self { row, col }
-    }
-}
-
 impl fmt::Display for Position {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         write!(f, "{}:{}", self.row, self.col)
+    }
+}
+
+impl From<(usize, usize)> for Position {
+    fn from((row, col): (usize, usize)) -> Self {
+        Self { row, col }
     }
 }
 
@@ -26,30 +26,12 @@ pub struct Range {
 }
 
 impl Range {
-    pub fn new(p1: Position, p2: Position) -> Self {
-        if p1 <= p2 {
-            Self {
-                lb: p1,
-                ub: p2
-            }
-        } else {
-            Self {
-                lb: p2,
-                ub: p1
-            }
-        }
-    }
-
     pub fn bounds(&self) -> (Position, Position) {
         (self.lb, self.ub)
     }
 
     pub fn contains(&self, other: &Self) -> bool {
         self.lb <= other.lb && other.ub <= self.ub
-    }
-
-    pub fn overlaps(&self, other: &Self) -> bool {
-        unimplemented!()
     }
 }
 
@@ -64,16 +46,26 @@ impl fmt::Display for Range {
     }
 }
 
+impl From<(Position, Position)> for Range {
+    fn from((p1, p2): (Position, Position)) -> Self {
+        if p1 <= p2 {
+            Self {
+                lb: p1,
+                ub: p2,
+            }
+        } else {
+            Self {
+                lb: p2,
+                ub: p1,
+            }
+        }
+    }
+}
+
 #[derive(Clone, Debug, Default, Eq, Hash, Ord, PartialOrd, PartialEq)]
 pub struct Spot {
     pub path: PathBuf,
     pub pos: Position,
-}
-
-impl Spot {
-    pub fn new(path: PathBuf, pos: Position) -> Self {
-        Self { path, pos }
-    }
 }
 
 impl fmt::Display for Spot {
@@ -89,10 +81,6 @@ pub struct Scope {
 }
 
 impl Scope {
-    pub fn new(path: PathBuf, range: Range) -> Self {
-        Self { path, range }
-    }
-
     pub fn lb(&self) -> Spot {
         Spot {
             path: self.path.clone(),
@@ -113,10 +101,6 @@ impl Scope {
 
     pub fn contains(&self, other: &Self) -> bool {
         self.path == other.path && self.range.contains(&other.range)
-    }
-
-    pub fn overlaps(&self, other: &Self) -> bool {
-        self.path == other.path && self.range.overlaps(&other.range)
     }
 }
 
@@ -158,29 +142,51 @@ pub struct Message {
 }
 
 impl Message {
-    pub fn bare(txt: String) -> Self {
-        let lvl = None;
-        Self { lvl, txt }
+    pub fn bare<S>(txt: S) -> Self
+    where
+        S: Into<String>,
+    {
+        Self {
+            lvl: None,
+            txt: txt.into(),
+        }
     }
 
-    pub fn with_lvl(lvl: Level, txt: String) -> Self {
-        let lvl = Some(lvl);
-        Self { lvl, txt }
+    pub fn with_lvl<S>(lvl: Level, txt: S) -> Self
+    where
+        S: Into<String>,
+    {
+        Self {
+            lvl: Some(lvl),
+            txt: txt.into(),
+        }
     }
 
-    pub fn error(txt: String) -> Self {
+    pub fn error<S>(txt: S) -> Self
+    where
+        S: Into<String>,
+    {
         Self::with_lvl(Level::Error, txt)
     }
 
-    pub fn warning(txt: String) -> Self {
+    pub fn warning<S>(txt: S) -> Self
+    where
+        S: Into<String>,
+    {
         Self::with_lvl(Level::Warning, txt)
     }
 
-    pub fn note(txt: String) -> Self {
+    pub fn note<S>(txt: S) -> Self
+    where
+        S: Into<String>,
+    {
         Self::with_lvl(Level::Note, txt)
     }
 
-    pub fn help(txt: String) -> Self {
+    pub fn help<S>(txt: S) -> Self
+    where
+        S: Into<String>,
+    {
         Self::with_lvl(Level::Help, txt)
     }
 
@@ -272,10 +278,10 @@ mod tests {
 
     #[test]
     fn position_ord() {
-        let p1 = Position::new(0, 0);
-        let p2 = Position::new(0, 1);
-        let p3 = Position::new(1, 0);
-        let p4 = Position::new(1, 1);
+        let p1 = Position::from((0, 0));
+        let p2 = Position::from((0, 1));
+        let p3 = Position::from((1, 0));
+        let p4 = Position::from((1, 1));
 
         assert!(p1 < p2);
         assert!(p2 < p3);
@@ -284,32 +290,32 @@ mod tests {
 
     #[test]
     fn position_fmt() {
-        let pos = Position::new(47, 11);
+        let pos = Position::from((47, 11));
         assert_eq!(format!("{}", pos), "47:11");
     }
 
     #[test]
-    fn range_ctor_symmetric() {
-        let p1 = Position::new(0, 1);
-        let p2 = Position::new(1, 0);
+    fn range_from_symmetric() {
+        let p1 = (0, 1).into();
+        let p2 = (1, 0).into();
 
-        let r1 = Range::new(p1, p2);
-        let r2 = Range::new(p2, p1);
+        let r1 = Range::from((p1, p2));
+        let r2 = Range::from((p2, p1));
 
         assert_eq!(r1, r2);
     }
 
     #[test]
     fn range_fmt() {
-        let p1 = Position::new(0, 0);
-        let p2 = Position::new(0, 1);
-        let p3 = Position::new(1, 0);
-        let p4 = Position::new(1, 1);
+        let p1 = (0, 0).into();
+        let p2 = (0, 1).into();
+        let p3 = (1, 0).into();
+        let p4 = (1, 1).into();
 
-        let r1 = Range::new(p1, p1);
-        let r2 = Range::new(p1, p2);
-        let r3 = Range::new(p1, p3);
-        let r4 = Range::new(p1, p4);
+        let r1 = Range::from((p1, p1));
+        let r2 = Range::from((p1, p2));
+        let r3 = Range::from((p1, p3));
+        let r4 = Range::from((p1, p4));
 
         assert_eq!(format!("{}", r1), "0:0");
         assert_eq!(format!("{}", r2), "0:0...1");
@@ -319,31 +325,31 @@ mod tests {
 
     #[test]
     fn spot_fmt() {
-        let spot = Spot::new(
-            "src/main.rs".into(),
-            Position::new(9, 11),
-        );
+        let spot = Spot {
+            path: "src/main.rs".into(),
+            pos:  (9, 11).into(),
+        };
         assert_eq!(format!("{}", spot), "src/main.rs:9:11");
     }
 
     #[test]
     fn scope_fmt() {
-        let scope = Scope::new(
-            "src/main.rs".into(),
-            Range::new(
-                Position::new(0, 815),
-                Position::new(47, 11),
-            ),
-        );
+        let scope = Scope {
+            path: "src/main.rs".into(),
+            range: (
+                (0, 815).into(),
+                (47, 11).into(),
+            ).into(),
+        };
         assert_eq!(format!("{}", scope), "src/main.rs:0:815...47:11");
     }
 
     #[test]
     fn message_fmt() {
-        let error   = Message::error(  "lorem ipsum".into());
-        let warning = Message::warning("lorem ipsum".into());
-        let note    = Message::note(   "lorem ipsum".into());
-        let help    = Message::help(   "lorem ipsum".into());
+        let error   = Message::error(  "lorem ipsum");
+        let warning = Message::warning("lorem ipsum");
+        let note    = Message::note(   "lorem ipsum");
+        let help    = Message::help(   "lorem ipsum");
 
         assert_eq!(format!("{}", error  ), "error: lorem ipsum"  );
         assert_eq!(format!("{}", warning), "warning: lorem ipsum");
@@ -354,27 +360,27 @@ mod tests {
     #[test]
     fn fault_fmt() {
         let fault = Fault {
-            msg: Message::warning("tabs should be avoided".into()),
+            msg: Message::warning("tabs should be avoided"),
             example: Example {
                 txt: "    let n = 42;".into(),
-                msg: Message::bare("tab found here".into()),
-                mark: Scope::new(
-                    "src/main.rs".into(),
-                    Range::new(
-                        Position::new(9, 0),
-                        Position::new(9, 3),
-                    ),
-                ),
-                ctx: Scope::new(
-                    "src/main.rs".into(),
-                    Range::new(
-                        Position::new(9, 0),
-                        Position::new(9, 14),
-                    ),
-                ),
+                msg: Message::bare("tab found here"),
+                mark: Scope {
+                    path: "src/main.rs".into(),
+                    range: (
+                        (9, 0).into(),
+                        (9, 3).into(),
+                    ).into(),
+                },
+                ctx: Scope {
+                    path: "src/main.rs".into(),
+                    range: (
+                        (9,  0).into(),
+                        (9, 14).into(),
+                    ).into(),
+                },
             },
             hints: vec![
-                Message::help("use spaces instead of tabs".into()),
+                Message::help("use spaces instead of tabs"),
             ],
         };
 
