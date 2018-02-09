@@ -26,11 +26,17 @@ pub struct Range {
 }
 
 impl Range {
-    pub fn new(lb: Position, ub: Position) -> Self {
-        if lb <= ub {
-            Self { lb, ub }
+    pub fn new(p1: Position, p2: Position) -> Self {
+        if p1 <= p2 {
+            Self {
+                lb: p1,
+                ub: p2
+            }
         } else {
-            Self { ub, lb }
+            Self {
+                lb: p2,
+                ub: p1
+            }
         }
     }
 
