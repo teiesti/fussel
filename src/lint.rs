@@ -23,41 +23,43 @@ impl IntoIterator for TrailingWhitespace {
             static ref REGEX: Regex = Regex::new(r"\s+$").unwrap();
         }
 
-        Box::new(
-            self.lines
-                .into_iter()
-                .filter_map(|x| {
-                    match x {
-                        Ok((path, i, line)) => {
-                            REGEX.find(line.clone().as_str())
-                                .map(|mat| {
-                                    Ok(Fault {
-                                        msg: Message::warning("lines should not end with trailing whitespace, unless the file format requires"),
-                                        example: Example {
-                                            mark: Scope {
-                                                path: path.clone(),
-                                                range: (
-                                                    (i, mat.start()   ).into(),
-                                                    (i, mat.end()  - 1).into(),
-                                                ).into(),
-                                            },
-                                            ctx: Scope {
-                                                path,
-                                                range: (
-                                                    (i, 0         ).into(),
-                                                    (i, line.len()).into(),
-                                                ).into(),
-                                            },
-                                            txt: line,
-                                            msg: Message::bare("whitespace found here"),
-                                        },
-                                        hints: vec![],
-                                    })
-                                })
-                        },
-                        Err(err) => Some(Err(err)),
-                    }
-                })
-        )
+        let iter = self.lines.into_iter().filter_map(|x| {
+            match x {
+                Ok((path, i, line)) => {
+                    REGEX.find(line.clone().as_str()).map(|mat| {
+                        Ok(Fault {
+                            msg: Message::warning(
+                                "lines should not end with trailing whitespace, \
+                                 unless the file format requires"
+                            ),
+                            example: Example {
+                                mark: Scope {
+                                    path: path.clone(),
+                                    range: (
+                                        (i, mat.start()   ).into(),
+                                        (i, mat.end()  - 1).into(),
+                                    ).into(),
+                                },
+                                ctx: Scope {
+                                    path,
+                                    range: (
+                                        (i, 0         ).into(),
+                                        (i, line.len()).into(),
+                                    ).into(),
+                                },
+                                txt: line,
+                                msg: Message::bare(
+                                    "whitespace found here"
+                                ),
+                            },
+                            hints: vec![],
+                        })
+                    })
+                },
+                Err(err) => Some(Err(err)),
+            }
+        });
+
+        Box::new(iter)
     }
 }
