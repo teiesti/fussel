@@ -1,5 +1,7 @@
 use failure::Error;
 use git2::Repository;
+use std::fs::File;
+use std::io::{BufRead, BufReader};
 use std::iter;
 use std::path::PathBuf;
 use walkdir::{DirEntry, WalkDir};
@@ -27,6 +29,20 @@ impl Project {
         let workdir = repo.workdir().ok_or(format_err!("git repository is bare"))?.to_path_buf();
             // TODO improve error message?
         Ok(Self::open(workdir))
+    }
+
+    pub fn files(self) -> Files {
+        Files {
+            project: self
+        }
+    }
+
+    pub fn readers(self) -> Readers {
+        self.files().readers()
+    }
+
+    pub fn lines(self) -> Lines {
+        self.readers().lines()
     }
 
     fn try_into_iter(self) -> Result<<Self as IntoIterator>::IntoIter, Error> {
@@ -87,5 +103,99 @@ impl IntoIterator for Project {
                     iter::once(Err(e))
                 )
             })
+    }
+}
+
+pub struct Files {
+    project: Project,
+}
+
+impl Files {
+    pub fn readers(self) -> Readers {
+        Readers {
+            files: self
+        }
+    }
+
+    pub fn lines(self) -> Lines {
+        self.readers().lines()
+    }
+}
+
+impl IntoIterator for Files {
+    type Item = Result<(PathBuf, File), Error>;
+    type IntoIter = Box<Iterator<Item = Self::Item>>;
+
+    fn into_iter(self) -> Self::IntoIter {
+        Box::new(
+            self.project
+                .into_iter()
+                .map(|x| {
+                    x.and_then(|path| {
+                        let file = File::open(&path).map_err(Error::from)?;
+                        Ok((path, file))
+                    })
+                })
+        )
+    }
+}
+
+pub struct Readers {
+    files: Files,
+}
+
+impl Readers {
+    pub fn lines(self) -> Lines {
+        Lines {
+            readers: self,
+        }
+    }
+}
+
+impl IntoIterator for Readers {
+    type Item = Result<(PathBuf, BufReader<File>), Error>;
+    type IntoIter = Box<Iterator<Item = Self::Item>>;
+
+    fn into_iter(self) -> Self::IntoIter {
+        Box::new(
+            self.files
+                .into_iter()
+                .map(|x| {
+                    x.and_then(|(path, file)| {
+                        let reader = BufReader::new(file);
+                        Ok((path, reader))
+                    })
+                })
+        )
+    }
+}
+
+pub struct Lines {
+    readers: Readers,
+}
+
+impl IntoIterator for Lines {
+    type Item = Result<(PathBuf, usize, String), Error>;
+    type IntoIter = Box<Iterator<Item = Self::Item>>;
+
+    fn into_iter(self) -> Self::IntoIter {
+        Box::new(
+            self.readers
+                .into_iter()
+                .flat_map(|x| -> Box<Iterator<Item = _>> {
+                    match x {
+                        Ok((path, reader)) => Box::new(
+                            reader
+                                .lines()
+                                .enumerate()
+                                .map(move |(i, line)| {
+                                    let line = line.map_err(Error::from)?;
+                                    Ok((path.clone(), i, line))
+                                })
+                        ),
+                        Err(err) => Box::new(iter::once(Err(err))),
+                    }
+                })
+        )
     }
 }
