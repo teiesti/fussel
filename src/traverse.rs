@@ -190,7 +190,7 @@ impl IntoIterator for Lines {
                                 .enumerate()
                                 .map(move |(i, line)| {
                                     let line = line.map_err(Error::from)?;
-                                    Ok((path.clone(), i, line))
+                                    Ok((path.clone(), i + 1, line))
                                 })
                         ),
                         Err(err) => Box::new(iter::once(Err(err))),
