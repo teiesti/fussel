@@ -231,11 +231,11 @@ impl fmt::Display for Example {
         let msg         = &self.msg;
 
         // Write data
-        writeln!(f, "{}--> {}"          , prefix, position              )?;
-        writeln!(f, "{} |"              , prefix                        )?;
-        writeln!(f, "{} |     {}"       , line, txt                     )?;
-        writeln!(f, "{} |     {}{} {}"  , prefix, offset, mark, msg     )?;
-        writeln!(f, "{} |"              , prefix                        )?;
+        writeln!(f, "{}--> {}"      , prefix, position              )?;
+        writeln!(f, "{} |"          , prefix                        )?;
+        writeln!(f, "{} | {}"       , line, txt                     )?;
+        writeln!(f, "{} | {}{} {}"  , prefix, offset, mark, msg     )?;
+        writeln!(f, "{} |"          , prefix                        )?;
 
         Ok(())
     }
@@ -383,8 +383,8 @@ mod tests {
             "warning: tabs should be avoided\n",
             " --> src/main.rs:9:0\n",
             "  |\n",
-            "9 |         let n = 42;\n",
-            "  |     ^^^^ tab found here\n",
+            "9 |     let n = 42;\n",
+            "  | ^^^^ tab found here\n",
             "  |\n",
             "  = help: use spaces instead of tabs\n",
         );
