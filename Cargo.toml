@@ -16,6 +16,8 @@ travis-ci = { repository = "teiesti/fussel" }
 [dependencies]
 failure = "0.1"
 git2 = "0.6"
+lazy_static = "1"
+regex = "0.2"
 walkdir = "2"
 
 [[bin]]

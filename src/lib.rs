@@ -10,11 +10,22 @@
 
 #[macro_use] extern crate failure;
 extern crate git2;
+#[macro_use] extern crate lazy_static;
+extern crate regex;
 extern crate walkdir;
 
 pub mod fault;
+pub mod lint;
 pub mod traverse;
 
+use lint::TrailingWhitespace;
+use traverse::Project;
+
 pub fn main() {
-    println!("Hello, world!");
+    let project = Project::open_git_workdir().unwrap(); // TODO remove unwrap
+    let lint = TrailingWhitespace::review(project.lines());
+
+    for fault in lint {
+        println!("{}", fault.unwrap()); // TODO remove unwrap
+    }
 }
