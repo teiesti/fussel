@@ -13,7 +13,7 @@ extern crate git2;
 extern crate walkdir;
 
 pub mod fault;
-pub mod walker;
+pub mod traverse;
 
 pub fn main() {
     println!("Hello, world!");
