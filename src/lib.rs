@@ -33,7 +33,7 @@ pub fn main() {
 pub fn run() -> Result<(), Error> {
     let project = Project::open_git_workdir()?;
     let lints = vec![
-        TrailingWhitespace::review(project.lines()),
+        TrailingWhitespace::review(project),
     ];
 
     for lint in lints {

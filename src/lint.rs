@@ -1,17 +1,23 @@
 use fault::{Example, Fault, Message, Scope};
-use traverse::Lines;
+use traverse::Project;
 
 use failure::Error;
 use regex::{Match, Regex};
+use std::collections::HashSet;
+use std::ffi::OsString;
 use std::path::PathBuf;
 
 pub struct TrailingWhitespace {
-    lines: Lines,
+    project: Project,
+    ignore_extensions: HashSet<OsString>,
 }
 
 impl TrailingWhitespace {
-    pub fn review(lines: Lines) -> Self {
-        Self { lines }
+    pub fn review(project: Project) -> Self {
+        Self {
+            project,
+            ignore_extensions: HashSet::new(),
+        }
     }
 }
 
@@ -19,11 +25,17 @@ impl IntoIterator for TrailingWhitespace {
     type Item = Result<Fault, Error>;
     type IntoIter = Box<Iterator<Item = Self::Item>>;
 
-    fn into_iter(self) -> Self::IntoIter {
+    fn into_iter(mut self) -> Self::IntoIter {
         // Prepare the regular expression
         lazy_static! {
             static ref REGEX: Regex = Regex::new(r"\s+$").unwrap();
         }
+
+        // Prepare the hint message
+        // TODO
+
+        // Extend the project's ignore extensions list
+        self.project.ignore_extensions.extend(self.ignore_extensions.drain());
 
         // Define how a fault has to be assembled
         let fault = |path: PathBuf, i: usize, line: String, mat: Match| {
@@ -57,7 +69,7 @@ impl IntoIterator for TrailingWhitespace {
         };
 
         // Assemble the iterator
-        let iter = self.lines.into_iter().filter_map(move |x| {
+        let iter = self.project.lines().into_iter().filter_map(move |x| {
             match x {
                 Ok((path, i, line)) => {
                     REGEX.find(line.clone().as_str())
