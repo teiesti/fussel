@@ -1,5 +1,7 @@
 use failure::Error;
 use git2::Repository;
+use std::collections::HashSet;
+use std::ffi::OsString;
 use std::fs::File;
 use std::io::{BufRead, BufReader};
 use std::iter;
@@ -9,6 +11,7 @@ use walkdir::{DirEntry, WalkDir};
 pub struct Project {
     pub root: PathBuf,
     pub respect_gitignore: bool,
+    pub ignore_extensions: HashSet<OsString>,
 }
 
 impl Project {
@@ -16,6 +19,7 @@ impl Project {
         Self {
             root,
             respect_gitignore: true,
+            ignore_extensions: HashSet::new(),
         }
     }
 
@@ -48,7 +52,7 @@ impl Project {
     fn try_into_iter(self) -> Result<<Self as IntoIterator>::IntoIter, Error> {
         // Initialize an empty set of filters
         let mut subtree_filter: Vec<Box<Fn(&DirEntry) -> bool>> = vec![];
-        let mut node_filter: Vec<Box<Fn(&DirEntry) -> bool>> = vec![];
+        let mut node_filter:    Vec<Box<Fn(&DirEntry) -> bool>> = vec![];
 
         // Add filter: Entries ignored by Git
         if self.respect_gitignore {
@@ -62,6 +66,16 @@ impl Project {
         node_filter.push(Box::new(
             |entry| entry.path().is_file()
         ));
+
+        // Add filter: Ignored extensions
+        if !self.ignore_extensions.is_empty() {
+            let exts = self.ignore_extensions; // prevents move of self
+            node_filter.push(Box::new(
+                move |entry| entry.path().extension().map_or(true, |ext| {
+                    !exts.contains(ext)
+                })
+            ));
+        }
 
         Ok(Box::new(
             // Create an iterator that traverses recursively through the directory
