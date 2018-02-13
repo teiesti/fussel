@@ -11,14 +11,14 @@ use std::path::PathBuf;
 
 pub struct TrailingWhitespace {
     project: Project,
-    ignore_extensions: HashSet<OsString>,
+    extension_blacklist: HashSet<OsString>,
 }
 
 impl Lint for TrailingWhitespace {
     fn review(project: Project) -> Self {
         Self {
             project,
-            ignore_extensions: HashSet::new(),
+            extension_blacklist: HashSet::new(),
         }
     }
 }
@@ -35,10 +35,10 @@ impl IntoIterator for TrailingWhitespace {
 
         // Prepare the hint messages
         let mut hints = vec![];
-        if !self.ignore_extensions.is_empty() {
+        if !self.extension_blacklist.is_empty() {
             hints.push({
                 // Format the ignored extensions
-                let mut exts: Vec<_> = self.ignore_extensions.iter().map(|ext| {
+                let mut exts: Vec<_> = self.extension_blacklist.iter().map(|ext| {
                     format!("'.{}'", ext.to_str().unwrap())
                 }).collect();
 
@@ -55,8 +55,8 @@ impl IntoIterator for TrailingWhitespace {
             })
         }
 
-        // Extend the project's ignore extensions list
-        self.project.ignore_extensions.extend(self.ignore_extensions.drain());
+        // Extend the project's extension blacklist
+        self.project.extension_blacklist.extend(self.extension_blacklist.drain());
 
         // Define how a fault has to be assembled
         let fault = move |path: PathBuf, i: usize, line: String, mat: Match| {

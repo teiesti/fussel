@@ -11,7 +11,7 @@ use walkdir::{DirEntry, WalkDir};
 pub struct Project {
     pub root: PathBuf,
     pub respect_gitignore: bool,
-    pub ignore_extensions: HashSet<OsString>,
+    pub extension_blacklist: HashSet<OsString>,
 }
 
 impl Project {
@@ -19,7 +19,7 @@ impl Project {
         Self {
             root,
             respect_gitignore: true,
-            ignore_extensions: HashSet::new(),
+            extension_blacklist: HashSet::new(),
         }
     }
 
@@ -67,9 +67,9 @@ impl Project {
             |entry| entry.path().is_file()
         ));
 
-        // Add filter: Ignored extensions
-        if !self.ignore_extensions.is_empty() {
-            let exts = self.ignore_extensions; // prevents move of self
+        // Add filter: Extension blacklist
+        if !self.extension_blacklist.is_empty() {
+            let exts = self.extension_blacklist; // prevents move of self
             node_filter.push(Box::new(
                 move |entry| entry.path().extension().map_or(true, |ext| {
                     !exts.contains(ext)
