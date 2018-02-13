@@ -20,7 +20,7 @@ pub mod lint;
 pub mod traverse;
 pub mod util;
 
-use lint::TrailingWhitespace;
+use lint::{Lint, TrailingWhitespace};
 use traverse::Project;
 
 use failure::Error;
