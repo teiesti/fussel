@@ -1,4 +1,5 @@
 use fault::{Example, Fault, Message, Scope};
+use lint::Lint;
 use traverse::Project;
 use util;
 
@@ -13,8 +14,8 @@ pub struct TrailingWhitespace {
     ignore_extensions: HashSet<OsString>,
 }
 
-impl TrailingWhitespace {
-    pub fn review(project: Project) -> Self {
+impl Lint for TrailingWhitespace {
+    fn review(project: Project) -> Self {
         Self {
             project,
             ignore_extensions: HashSet::new(),
