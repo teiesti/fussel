@@ -36,11 +36,18 @@ impl IntoIterator for TrailingWhitespace {
         let mut hints = vec![];
         if !self.ignore_extensions.is_empty() {
             hints.push({
-                let list = util::list_or(
-                    &mut self.ignore_extensions.iter().map(|ext| {
-                        format!("'.{}'", ext.to_str().unwrap())
-                    })
-                );
+                // Format the ignored extensions
+                let mut exts: Vec<_> = self.ignore_extensions.iter().map(|ext| {
+                    format!("'.{}'", ext.to_str().unwrap())
+                }).collect();
+
+                // Sort them
+                exts.sort_unstable();
+
+                // Create a list in natural language
+                let list = util::list_or(&mut exts.iter());
+
+                // Assemble the hint message
                 Message::note(
                     format!("filenames ending with {} are ignored", list)
                 )
