@@ -12,11 +12,14 @@
 extern crate git2;
 #[macro_use] extern crate lazy_static;
 extern crate regex;
+#[macro_use] extern crate serde_derive;
 #[macro_use] extern crate structopt;
+extern crate toml;
 extern crate walkdir;
 extern crate yansi;
 
 pub mod cli;
+pub mod config;
 pub mod fault;
 pub mod lint;
 pub mod traverse;

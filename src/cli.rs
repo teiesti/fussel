@@ -19,6 +19,12 @@ fn try_main() -> Result<(), Error> {
     // Parse the arguments
     let opt = Opt::from_args();
 
+    /*
+     * TODO:
+     *   - Load and use the configuration
+     *   - Add the option the change the "current directory" via an argument (like 'git -C <path>')
+     */
+
     // Configure the lints
     let project = Project::open_git_workdir()?;
     let lints = vec![
