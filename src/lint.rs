@@ -1,5 +1,6 @@
 use fault::{Example, Fault, Message, Scope};
 use traverse::Project;
+use util;
 
 use failure::Error;
 use regex::{Match, Regex};
@@ -31,14 +32,26 @@ impl IntoIterator for TrailingWhitespace {
             static ref REGEX: Regex = Regex::new(r"\s+$").unwrap();
         }
 
-        // Prepare the hint message
-        // TODO
+        // Prepare the hint messages
+        let mut hints = vec![];
+        if !self.ignore_extensions.is_empty() {
+            hints.push({
+                let list = util::list_or(
+                    &mut self.ignore_extensions.iter().map(|ext| {
+                        format!("'.{}'", ext.to_str().unwrap())
+                    })
+                );
+                Message::note(
+                    format!("filenames ending with {} are ignored", list)
+                )
+            })
+        }
 
         // Extend the project's ignore extensions list
         self.project.ignore_extensions.extend(self.ignore_extensions.drain());
 
         // Define how a fault has to be assembled
-        let fault = |path: PathBuf, i: usize, line: String, mat: Match| {
+        let fault = move |path: PathBuf, i: usize, line: String, mat: Match| {
             Fault {
                 msg: Message::warning(
                     "lines should not end with trailing whitespace, \
@@ -64,7 +77,7 @@ impl IntoIterator for TrailingWhitespace {
                         "whitespace found here"
                     ),
                 },
-                hints: vec![],
+                hints: hints.clone(),
             }
         };
 

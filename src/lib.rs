@@ -18,6 +18,7 @@ extern crate yansi;
 pub mod fault;
 pub mod lint;
 pub mod traverse;
+pub mod util;
 
 use lint::TrailingWhitespace;
 use traverse::Project;
