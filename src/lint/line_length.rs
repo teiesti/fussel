@@ -6,7 +6,6 @@ use failure::Error;
 
 pub struct LineLength {
     project: Project,
-    length: usize,
 }
 
 impl Lint for LineLength {

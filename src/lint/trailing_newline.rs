@@ -6,7 +6,6 @@ use failure::Error;
 
 pub struct TrailingNewline {
     project: Project,
-    strict: bool,
 }
 
 impl Lint for TrailingNewline {
