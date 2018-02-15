@@ -10,18 +10,11 @@ use std::ffi::OsString;
 use std::path::PathBuf;
 
 pub struct TrailingWhitespace {
-    project: Project,
-    extension_blacklist: HashSet<OsString>,
+    pub project: Project,
+    pub extension_blacklist: HashSet<OsString>,
 }
 
-impl Lint for TrailingWhitespace {
-    fn review(project: Project) -> Self {
-        Self {
-            project,
-            extension_blacklist: HashSet::new(),
-        }
-    }
-}
+impl Lint for TrailingWhitespace {}
 
 impl IntoIterator for TrailingWhitespace {
     type Item = Result<Fault, Error>;

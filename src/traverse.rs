@@ -15,26 +15,6 @@ pub struct Project {
 }
 
 impl Project {
-    pub fn open(root: PathBuf) -> Self {
-        Self {
-            root,
-            respect_gitignore: true,
-            extension_blacklist: HashSet::new(),
-        }
-    }
-
-    pub fn open_current_dir() -> Result<Self, Error> {
-        Ok(Self::open(::std::env::current_dir()?))
-    }
-
-    pub fn open_git_workdir() -> Result<Self, Error> {
-        let pwd = ::std::env::current_dir().map_err(Error::from)?;
-        let repo = Repository::discover(pwd).map_err(Error::from)?;
-        let workdir = repo.workdir().ok_or(format_err!("git repository is bare"))?.to_path_buf();
-            // TODO improve error message?
-        Ok(Self::open(workdir))
-    }
-
     pub fn files(self) -> Files {
         Files {
             project: self

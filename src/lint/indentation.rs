@@ -5,16 +5,10 @@ use traverse::Project;
 use failure::Error;
 
 pub struct Indentation {
-    project: Project,
+    pub project: Project,
 }
 
-impl Lint for Indentation {
-    fn review(project: Project) -> Self {
-        Self {
-            project,
-        }
-    }
-}
+impl Lint for Indentation {}
 
 impl IntoIterator for Indentation {
     type Item = Result<Fault, Error>;

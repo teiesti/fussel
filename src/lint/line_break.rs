@@ -5,16 +5,10 @@ use traverse::Project;
 use failure::Error;
 
 pub struct LineBreak {
-    project: Project,
+    pub project: Project,
 }
 
-impl Lint for LineBreak {
-    fn review(project: Project) -> Self {
-        Self {
-            project,
-        }
-    }
-}
+impl Lint for LineBreak {}
 
 impl IntoIterator for LineBreak {
     type Item = Result<Fault, Error>;

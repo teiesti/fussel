@@ -18,19 +18,18 @@ extern crate toml;
 extern crate walkdir;
 extern crate yansi;
 
-pub mod cli;
-pub mod config;
+pub mod env;
 pub mod fault;
 pub mod lint;
 pub mod traverse;
 pub mod util;
 
-use cli::Opt;
-use lint::{Lint, TrailingWhitespace};
+use env::Env;
+use lint::TrailingWhitespace;
 use traverse::Project;
 
 use failure::Error;
-use structopt::StructOpt;
+use std::collections::HashSet;
 
 pub fn main() {
     if let Err(err) = try_main() {
@@ -39,20 +38,26 @@ pub fn main() {
 }
 
 fn try_main() -> Result<(), Error> {
-    // Parse the arguments
-    let opt = Opt::from_args();
+    // Initialize the environment
+    let env = Env::init()?;
 
-    /*
-     * TODO:
-     *   - Load and use the configuration
-     *   - Add the option the change the "current directory" via an argument (like 'git -C <path>')
-     */
+    // Configure the traversal
+    let project = Project {
+        root: env.working_dir,
+        respect_gitignore: true, // TODO add env option
+        extension_blacklist: HashSet::new(), // TODO add env option
+    };
 
     // Configure the lints
-    let project = Project::open_git_workdir()?;
-    let lints = vec![
-        TrailingWhitespace::review(project),
-    ];
+    let mut lints = vec![];
+    if let Some(trailing_whitespace) = env.lints.trailing_whitespace {
+        lints.push(
+            TrailingWhitespace {
+                project,
+                extension_blacklist: trailing_whitespace.extension_blacklist,
+            }
+        );
+    }
 
     // Run the lints
     for lint in lints {

@@ -5,16 +5,10 @@ use traverse::Project;
 use failure::Error;
 
 pub struct TrailingNewline {
-    project: Project,
+    pub project: Project,
 }
 
-impl Lint for TrailingNewline {
-    fn review(project: Project) -> Self {
-        Self {
-            project,
-        }
-    }
-}
+impl Lint for TrailingNewline {}
 
 impl IntoIterator for TrailingNewline {
     type Item = Result<Fault, Error>;

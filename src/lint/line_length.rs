@@ -5,16 +5,10 @@ use traverse::Project;
 use failure::Error;
 
 pub struct LineLength {
-    project: Project,
+    pub project: Project,
 }
 
-impl Lint for LineLength {
-    fn review(project: Project) -> Self {
-        Self {
-            project,
-        }
-    }
-}
+impl Lint for LineLength {}
 
 impl IntoIterator for LineLength {
     type Item = Result<Fault, Error>;
