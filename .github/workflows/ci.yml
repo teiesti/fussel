@@ -1,0 +1,51 @@
+name: CI
+on: [push, pull_request]
+
+jobs:
+  test:
+    name: Test
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        rust: [stable, beta, nightly]
+    steps:
+      - name: Checkout the source code
+        uses: actions/checkout@master
+        with:
+          fetch-depth: 1
+      - name: Setup Rust ${{ matrix.rust }}
+        run: |
+          rustup set profile minimal
+          rustup update ${{ matrix.rust }} --no-self-update
+          rustup default ${{ matrix.rust }}
+      - name: Build application
+        run: cargo build
+      - name: Run tests
+        run: cargo test
+
+  doc:
+    name: Documentation
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout the source code
+        uses: actions/checkout@master
+        with:
+          fetch-depth: 1
+      - name: Setup Rust stable
+        run: |
+          rustup set profile minimal
+          rustup update stable --no-self-update
+          rustup default stable
+      - name: Build documentation
+        run: cargo doc
+
+  tidy:
+    name: Tidy
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout the source code
+        uses: actions/checkout@master
+        with:
+          fetch-depth: 1
+      - name: Search for bad programming habits
+        run: ./tidy/run.sh
