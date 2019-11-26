@@ -1,0 +1,14 @@
+[package]
+name = "fussel"
+version = "0.1.0-dev"
+authors = ["Tobias Stolzmann <tobias.stolzmann@gmail.com>"]
+license = "MIT"
+keywords = ["lint", "style"]
+categories = ["development-tools"]
+description = "An analysis tool that finds bad programming habits in a codebase"
+readme = "README.md"
+documentation = "https://docs.rs/fussel"
+repository = "https://github.com/teiesti/fussel"
+edition = "2018"
+
+[dependencies]
