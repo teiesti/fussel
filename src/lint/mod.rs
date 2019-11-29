@@ -1,3 +1,5 @@
+pub(crate) mod incomplete_work;
+
 use crate::fault::Fault;
 
 use std::fs::Metadata;
