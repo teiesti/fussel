@@ -12,3 +12,5 @@ repository = "https://github.com/teiesti/fussel"
 edition = "2018"
 
 [dependencies]
+crossbeam = "0.7"
+tokio = { version = "0.2", features = ["full"] }
