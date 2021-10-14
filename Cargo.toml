@@ -1,0 +1,6 @@
+[package]
+name = "fussel"
+version = "0.1.0-dev"
+edition = "2018"
+
+[dependencies]
