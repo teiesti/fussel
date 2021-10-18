@@ -1,7 +1,7 @@
 use std::{
-    sync::{Arc, RwLock},
-    path::{PathBuf, Path},
     fs::Metadata,
+    path::{Path, PathBuf},
+    sync::{Arc, RwLock},
 };
 
 #[derive(Clone, Debug)]
@@ -13,7 +13,30 @@ pub(crate) enum Node {
     Content(ContentNode),
 }
 
+macro_rules! impl_node_from {
+    ($variant:ident, $from:ident, $conv:expr) => {
+        impl From<$from> for Node {
+            fn from(x: $from) -> Node {
+                Node::$variant($conv(x))
+            }
+        }
+    };
+}
+
+impl_node_from!(Project, Project, wrap);
+impl_node_from!(Project, ProjectNode, |x| x);
+impl_node_from!(Directory, Directory, wrap);
+impl_node_from!(Directory, DirectoryNode, |x| x);
+impl_node_from!(File, File, wrap);
+impl_node_from!(File, FileNode, |x| x);
+impl_node_from!(Content, Content, wrap);
+impl_node_from!(Content, ContentNode, |x| x);
+
 type Wrapped<I> = Arc<RwLock<I>>;
+
+fn wrap<I>(inner: I) -> Wrapped<I> {
+    Arc::new(RwLock::new(inner))
+}
 
 pub(crate) type ProjectNode = Wrapped<Project>;
 
@@ -55,7 +78,7 @@ struct Entries {
 pub(crate) struct File {
     path: PathBuf,
     metadata: Metadata,
-    entries: Option<Wrapped<Content>>,
+    content: Option<Wrapped<Content>>,
 }
 
 #[derive(Debug)]
