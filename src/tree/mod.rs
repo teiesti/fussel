@@ -1,3 +1,5 @@
+pub(crate) mod expand;
+
 use std::{
     fs::Metadata,
     path::{Path, PathBuf},
@@ -79,6 +81,16 @@ pub(crate) struct File {
     path: PathBuf,
     metadata: Metadata,
     content: Option<Wrapped<Content>>,
+}
+
+impl File {
+    pub(crate) fn path(&self) -> &Path {
+        self.path.as_path()
+    }
+
+    pub(crate) fn metadata(&self) -> &Metadata {
+        &self.metadata
+    }
 }
 
 #[derive(Debug)]
