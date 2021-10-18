@@ -1,10 +1,16 @@
 pub(crate) mod expand;
+pub(crate) mod load;
+pub(crate) mod print;
 pub(crate) mod traverse;
 
-use std::{
-    fs::Metadata,
-    path::{Path, PathBuf},
-    sync::{Arc, RwLock},
+use {
+    self::{load::Loader, traverse::Traversable},
+    std::{
+        sync::{Arc, RwLock},
+        fs::{canonicalize, metadata, Metadata},
+        io::Result,
+        path::{Path, PathBuf},
+    },
 };
 
 #[derive(Clone, Debug)]
@@ -37,7 +43,7 @@ impl_node_from!(Content, ContentNode, |x| x);
 
 type Wrapped<I> = Arc<RwLock<I>>;
 
-fn wrap<I>(inner: I) -> Wrapped<I> {
+pub(crate) fn wrap<I>(inner: I) -> Wrapped<I> {
     Arc::new(RwLock::new(inner))
 }
 
@@ -52,6 +58,29 @@ pub(crate) type ContentNode = Wrapped<Content>;
 #[derive(Debug)]
 pub(crate) struct Project {
     root: Wrapped<Directory>,
+}
+
+impl Project {
+    pub(crate) fn open<P: AsRef<Path>>(path: P) -> Result<ProjectNode> { // TODO return type?
+        let path = canonicalize(path)?;
+        let metadata = metadata(path.as_path())?;
+
+        let root = wrap(Directory {
+            path,
+            metadata,
+            entries: None,
+        });
+
+        let project = wrap(Project { root });
+
+        project.clone().traverse(&mut Loader);
+
+        Ok(project)
+    }
+
+    pub(crate) fn discover<P: AsRef<Path>>(path: P) -> Result<ProjectNode> {
+        todo!()
+    }
 }
 
 #[derive(Debug)]

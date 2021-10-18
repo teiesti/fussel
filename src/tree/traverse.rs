@@ -12,7 +12,10 @@ pub(crate) trait Traversable {
 
 impl Traversable for ProjectNode {
     fn traverse<V: Visitor>(self, visitor: &mut V) -> bool {
-        visitor.enter(self.clone().into());
+        if visitor.enter(self.clone().into()) {
+            let project = self.read().unwrap();
+            project.root.clone().traverse(visitor);
+        }
         visitor.leave(self.into())
     }
 }
