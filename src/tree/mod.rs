@@ -1,4 +1,5 @@
 pub(crate) mod expand;
+pub(crate) mod traverse;
 
 use std::{
     fs::Metadata,
